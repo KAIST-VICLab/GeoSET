@@ -108,10 +108,10 @@ If you find GeoSET useful, please consider citing:
 Our prior work on SAR-to-EO image translation, [C-DiffSET](https://github.com/KAIST-VICLab/C-DiffSET) ([project page](https://kaist-viclab.github.io/C-DiffSET_site/)):
 ```BibTeX
 @article{do2026cdiffset,
-  title={C-DiffSET: Leveraging Latent Diffusion for SAR-to-EO Image Translation with Confidence-Guided Reliable Object Generation},
+  title={C-diffset: Leveraging latent diffusion for sar-to-eo image translation with confidence-guided reliable object generation},
   author={Do, Jeonghyeok and Lee, Jaehyup and Lee, Seungchul and Kim, Munchurl},
   journal={IEEE Transactions on Circuits and Systems for Video Technology},
   year={2026},
-  doi={10.1109/TCSVT.2026.3701447}
+  publisher={IEEE}
 }
 ```
