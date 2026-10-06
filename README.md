@@ -25,7 +25,7 @@
         <img src="https://img.shields.io/badge/🏠-Project%20Page-blue">
         </a>
         <!-- ARXIV_BADGE_START --><a href="https://arxiv.org/abs/2609.37496" target="_blank"><img src="https://img.shields.io/badge/arXiv-2609.37496-b31b1b.svg" alt="arXiv"></a><!-- ARXIV_BADGE_END -->
-        <a href="https://huggingface.co/JeonghyeokDo/GeoSET" target="_blank"><img src="https://img.shields.io/badge/🤗-Models-yellow" alt="Models"></a>
+        <a href="https://huggingface.co/JeonghyeokDo/GeoSET" target="_blank"><img alt="Hugging Face" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-GeoCR-yellow"></a>
         <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/KAIST-VICLab/GeoSET">
     </h4>
 </div>
