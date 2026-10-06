@@ -331,10 +331,10 @@ GeoSET/
 
 ## 🚀 Code Release Plan
 
-- [x] Inference code
-- [x] Pretrained models
-- [x] Training scripts
-- [x] Evaluation scripts
+- ✅ Inference code
+- ✅ Pretrained models
+- ✅ Training scripts
+- ✅ Evaluation scripts
 
 ## 📑 Citation
 If you find GeoSET useful, please consider citing:
