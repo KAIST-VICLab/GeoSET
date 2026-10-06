@@ -1,0 +1,45 @@
+seed: 2024
+num_worker: 4
+work_dir: ${WORK_DIR}/sd21-ft/qxs-saropt/
+
+phase: train
+
+feeder: feeders.feeder.QXSFeeder
+train_feeder_args:
+  dataroot: ${DATA_ROOT}/qxs-saropt/
+  listroot: ${WORK_DIR}/ldm_data/qxs-saropt/cdiffset/train.txt
+  load_size: 256
+  crop_size: 256
+  hflip: True
+  vflip: True
+  rot: True
+
+test_feeder_args:
+  dataroot: ${DATA_ROOT}/qxs-saropt/
+  listroot: ${WORK_DIR}/ldm_data/qxs-saropt/cdiffset/test.txt
+  load_size: 256
+  crop_size: 256
+
+optimizer: AdamW
+learning_rate: 3e-5
+weight_decay: 0.01
+lr_scheduler: cosine
+num_iter: 50000
+num_warmup: 100
+
+prediction_type: epsilon
+
+log_iter: 100
+save_iter: 10000
+save_epoch: 50
+eval_epoch: 10
+
+gpu: 0
+batch_size: 64
+test_batch_size: 1
+mixed_precision: "no"
+pretrained_model_name_or_path: Manojb/stable-diffusion-2-1-base
+accelerator_path: ${CKPT_ROOT}/sd21_unet8ch_init.safetensors
+
+num_inference_steps: 50
+val_len: 100

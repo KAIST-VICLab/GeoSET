@@ -1,0 +1,60 @@
+diff --git a/datasets/__init__.py b/datasets/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/model/VQGAN/vqgan.py b/model/VQGAN/vqgan.py
+index d5f0603..1c07596 100644
+--- a/model/VQGAN/vqgan.py
++++ b/model/VQGAN/vqgan.py
+@@ -61,7 +61,7 @@ class VQModel(pl.LightningModule):
+             self.monitor = monitor
+ 
+     def init_from_ckpt(self, path, ignore_keys=list()):
+-        sd = torch.load(path, map_location="cpu")["state_dict"]
++        sd = torch.load(path, map_location="cpu", weights_only=False)["state_dict"]
+         keys = list(sd.keys())
+         for k in keys:
+             for ik in ignore_keys:
+diff --git a/runners/BaseRunner.py b/runners/BaseRunner.py
+index 33decf5..afb2035 100644
+--- a/runners/BaseRunner.py
++++ b/runners/BaseRunner.py
+@@ -112,7 +112,7 @@ class BaseRunner(ABC):
+         model_states = None
+         if self.config.model.__contains__('model_load_path') and self.config.model.model_load_path is not None:
+             self.logger(f"load model {self.config.model.model_name} from {self.config.model.model_load_path}")
+-            model_states = torch.load(self.config.model.model_load_path, map_location='cpu')
++            model_states = torch.load(self.config.model.model_load_path, map_location='cpu', weights_only=False)
+ 
+             self.global_epoch = model_states['epoch']
+             self.global_step = model_states['step']
+@@ -128,7 +128,7 @@ class BaseRunner(ABC):
+             # load optimizer and scheduler
+             if self.config.args.train:
+                 if self.config.model.__contains__('optim_sche_load_path') and self.config.model.optim_sche_load_path is not None:
+-                    optimizer_scheduler_states = torch.load(self.config.model.optim_sche_load_path, map_location='cpu')
++                    optimizer_scheduler_states = torch.load(self.config.model.optim_sche_load_path, map_location='cpu', weights_only=False)
+                     for i in range(len(self.optimizer)):
+                         self.optimizer[i].load_state_dict(optimizer_scheduler_states['optimizer'][i])
+ 
+diff --git a/runners/DiffusionBasedModelRunners/BBDMRunner.py b/runners/DiffusionBasedModelRunners/BBDMRunner.py
+index 3243ad5..fdf7c32 100644
+--- a/runners/DiffusionBasedModelRunners/BBDMRunner.py
++++ b/runners/DiffusionBasedModelRunners/BBDMRunner.py
+@@ -32,7 +32,7 @@ class BBDMRunner(DiffusionBaseRunner):
+         states = None
+         if self.config.model.only_load_latent_mean_std:
+             if self.config.model.__contains__('model_load_path') and self.config.model.model_load_path is not None:
+-                states = torch.load(self.config.model.model_load_path, map_location='cpu')
++                states = torch.load(self.config.model.model_load_path, map_location='cpu', weights_only=False)
+         else:
+             states = super().load_model_from_checkpoint()
+ 
+@@ -60,7 +60,7 @@ class BBDMRunner(DiffusionBaseRunner):
+         optimizer = get_optimizer(config.model.BB.optimizer, net.get_parameters())
+         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
+                                                                mode='min',
+-                                                               verbose=True,
++
+                                                                threshold_mode='rel',
+                                                                **vars(config.model.BB.lr_scheduler)
+ )

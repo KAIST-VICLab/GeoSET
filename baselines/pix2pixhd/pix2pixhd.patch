@@ -1,0 +1,53 @@
+diff --git a/data/base_dataset.py b/data/base_dataset.py
+index ece8813..8f5dcfa 100755
+--- a/data/base_dataset.py
++++ b/data/base_dataset.py
+@@ -34,7 +34,7 @@ def get_transform(opt, params, method=Image.BICUBIC, normalize=True):
+     transform_list = []
+     if 'resize' in opt.resize_or_crop:
+         osize = [opt.loadSize, opt.loadSize]
+-        transform_list.append(transforms.Scale(osize, method))   
++        transform_list.append(transforms.Resize(osize, method))   
+     elif 'scale_width' in opt.resize_or_crop:
+         transform_list.append(transforms.Lambda(lambda img: __scale_width(img, opt.loadSize, method)))
+         
+diff --git a/train.py b/train.py
+index acedac2..c3c032d 100755
+--- a/train.py
++++ b/train.py
+@@ -5,8 +5,8 @@ import torch
+ from torch.autograd import Variable
+ from collections import OrderedDict
+ from subprocess import call
+-import fractions
+-def lcm(a,b): return abs(a * b)/fractions.gcd(a,b) if a and b else 0
++import math
++def lcm(a,b): return abs(a * b)//math.gcd(a,b) if a and b else 0
+ 
+ from options.train_options import TrainOptions
+ from data.data_loader import CreateDataLoader
+diff --git a/util/visualizer.py b/util/visualizer.py
+index 584ac45..0a2987b 100755
+--- a/util/visualizer.py
++++ b/util/visualizer.py
+@@ -4,7 +4,10 @@ import ntpath
+ import time
+ from . import util
+ from . import html
+-import scipy.misc
++try:
++    import scipy.misc  # removed in scipy>=1.12; only needed for --tf_log
++except ImportError:
++    pass
+ try:
+     from StringIO import StringIO  # Python 2.7
+ except ImportError:
+@@ -121,7 +124,7 @@ class Visualizer():
+         links = []
+ 
+         for label, image_numpy in visuals.items():
+-            image_name = '%s_%s.jpg' % (name, label)
++            image_name = '%s_%s.png' % (name, label)
+             save_path = os.path.join(image_dir, image_name)
+             util.save_image(image_numpy, save_path)
+ 

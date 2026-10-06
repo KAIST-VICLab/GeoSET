@@ -1,0 +1,133 @@
+trainer:
+  target: trainer.TrainerDifIRLPIPS
+
+model:
+  target: models.unet.UNetModelSwin
+  ckpt_path: ~
+  params:
+    image_size: 64
+    in_channels: 3
+    model_channels: 160
+    out_channels: 3
+    attention_resolutions: [64,32,16,8]
+    dropout: 0
+    channel_mult: [1, 2, 2, 4]
+    num_res_blocks: [2, 2, 2, 2]
+    conv_resample: True
+    dims: 2
+    use_fp16: False
+    num_head_channels: 32
+    use_scale_shift_norm: True
+    resblock_updown: False
+    swin_depth: 2
+    swin_embed_dim: 192
+    window_size: 8
+    mlp_ratio: 4
+    cond_lq: True
+    lq_size: 256
+
+diffusion:
+  target: models.script_util.create_gaussian_diffusion
+  params:
+    sf: 1
+    schedule_name: exponential
+    schedule_kwargs:
+      power: 0.3
+    etas_end: 0.99
+    steps: 4
+    min_noise_level: 0.2
+    kappa: 2.0
+    weighted_mse: False
+    predict_type: xstart
+    timestep_respacing: ~
+    scale_factor: 1.0
+    normalize_input: True
+    latent_flag: True
+
+autoencoder:
+  target: ldm.models.autoencoder.VQModelTorch
+  ckpt_path: ${BASELINES_ROOT}/resshift/weights/autoencoder_vq_f4.pth
+  tune_decoder: False
+  params:
+    lora_tune_decoder: False
+    embed_dim: 3
+    n_embed: 8192
+    ddconfig:
+      double_z: False
+      z_channels: 3
+      resolution: 256
+      in_channels: 3
+      out_ch: 3
+      ch: 128
+      ch_mult:
+      - 1
+      - 2
+      - 4
+      num_res_blocks: 2
+      attn_resolutions: []
+      dropout: 0.0
+      padding_mode: zeros
+
+lpips:
+  net: alex
+
+data:
+  train:
+    type: paired
+    params:
+      dir_path: ${WORK_DIR}/diff_data/sar2opt/paired/trainA
+      dir_path_extra: ${WORK_DIR}/diff_data/sar2opt/paired/trainB
+      transform_type: rcrop_aug_norm
+      transform_kwargs:
+        pass_aug: False
+        pch_size: 256
+        mean: 0.5
+        std: 0.5
+        max_value: 255
+      im_exts: jpg
+      length: ~
+      recursive: False
+  val:
+    type: paired
+    params:
+      dir_path: ${WORK_DIR}/diff_data/sar2opt/paired/testA
+      dir_path_extra: ${WORK_DIR}/diff_data/sar2opt/paired/testB
+      transform_type: default
+      transform_kwargs:
+        pass_aug: True
+        pch_size: 256
+        mean: ${data.train.params.transform_kwargs.mean}
+        std: ${data.train.params.transform_kwargs.std}
+        max_value: ${data.train.params.transform_kwargs.max_value}
+      im_exts: png
+      length: 32
+      recursive: False
+
+train:
+  lr: 5e-5
+  lr_min: 2e-5
+  lr_schedule: cosin
+  warmup_iterations: 2000
+  batch: [16, 4]
+  microbatch: 8
+  num_workers: 4
+  prefetch_factor: 2
+  weight_decay: 0
+  ema_rate: 0.999
+  iterations: 50000
+  save_freq: 5000
+  log_freq: [200, 2000, 4]
+  loss_coef: [1.0, 4.0, 0.0]
+  local_logging: True
+  tf_logging: False
+  use_ema_val: True
+  val_freq: ${train.save_freq}
+  val_y_channel: True
+  val_resolution: ${model.params.lq_size}
+  val_padding_mode: reflect
+  use_amp: True
+  seed: 123456
+  global_seeding: False
+  compile:
+    flag: False
+    mode: reduce-overhead

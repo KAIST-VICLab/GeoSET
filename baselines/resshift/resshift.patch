@@ -1,0 +1,102 @@
+diff --git a/inference_sar2eo.py b/inference_sar2eo.py
+new file mode 100644
+index 0000000..a289dcb
+--- /dev/null
++++ b/inference_sar2eo.py
+@@ -0,0 +1,39 @@
++#!/usr/bin/env python
++"""Paired SAR-to-EO inference with a trained ResShift model.
++
++Writes one PNG per input image, named by the input stem. Inputs larger than lq_size
++are processed as non-overlapping lq_size tiles.
++
++Usage:
++  python inference_sar2eo.py --cfg_path <config.yaml> --ckpt <ema_model.pth> \
++      --in_dir <SAR images> --out_dir <output dir> --bs 16
++"""
++import argparse
++
++from omegaconf import OmegaConf
++from sampler import ResShiftSampler
++
++parser = argparse.ArgumentParser()
++parser.add_argument('--cfg_path', type=str, required=True)
++parser.add_argument('--ckpt', type=str, required=True,
++                    help='Trained diffusion model checkpoint (use the EMA one)')
++parser.add_argument('--in_dir', type=str, required=True, help='Folder of SAR images')
++parser.add_argument('--out_dir', type=str, required=True, help='Output folder for EO predictions')
++parser.add_argument('--bs', type=int, default=16)
++parser.add_argument('--seed', type=int, default=12345)
++args = parser.parse_args()
++
++configs = OmegaConf.load(args.cfg_path)
++configs.model.ckpt_path = args.ckpt
++
++sampler = ResShiftSampler(
++        configs,
++        sf=configs.diffusion.params.sf,          # 1
++        use_amp=True,
++        chop_size=configs.model.params.lq_size,  # 256 -> no chopping for 256px inputs
++        chop_stride=configs.model.params.lq_size,
++        chop_bs=1,
++        padding_offset=configs.model.params.get('lq_size', 64),
++        seed=args.seed,
++        )
++sampler.inference(args.in_dir, args.out_dir, mask_path=None, bs=args.bs, noise_repeat=False)
+diff --git a/ldm/modules/attention.py b/ldm/modules/attention.py
+index d040db0..c5e7417 100644
+--- a/ldm/modules/attention.py
++++ b/ldm/modules/attention.py
+@@ -12,7 +12,8 @@ from ldm.modules.diffusionmodules.util import checkpoint
+ try:
+     import xformers
+     import xformers.ops
+-    XFORMERS_IS_AVAILBLE = True
++    # xformers disabled; PyTorch attention is used.
++    XFORMERS_IS_AVAILBLE = False
+ except:
+     XFORMERS_IS_AVAILBLE = False
+ 
+diff --git a/ldm/modules/diffusionmodules/model.py b/ldm/modules/diffusionmodules/model.py
+index 036b8eb..844da47 100644
+--- a/ldm/modules/diffusionmodules/model.py
++++ b/ldm/modules/diffusionmodules/model.py
+@@ -11,7 +11,8 @@ from ldm.modules.attention import MemoryEfficientCrossAttention
+ try:
+     import xformers
+     import xformers.ops
+-    XFORMERS_IS_AVAILBLE = True
++    # xformers disabled; PyTorch attention is used.
++    XFORMERS_IS_AVAILBLE = False
+ except:
+     XFORMERS_IS_AVAILBLE = False
+     print("No module 'xformers'. Proceeding without it.")
+diff --git a/models/unet.py b/models/unet.py
+index 5bd4507..b4d3e56 100644
+--- a/models/unet.py
++++ b/models/unet.py
+@@ -21,7 +21,8 @@ from .swin_transformer import BasicLayer
+ try:
+     import xformers
+     import xformers.ops as xop
+-    XFORMERS_IS_AVAILBLE = True
++    # xformers disabled; PyTorch attention is used.
++    XFORMERS_IS_AVAILBLE = False
+ except:
+     XFORMERS_IS_AVAILBLE = False
+ 
+diff --git a/trainer.py b/trainer.py
+index 1b523e7..d42e98e 100644
+--- a/trainer.py
++++ b/trainer.py
+@@ -385,7 +385,10 @@ class TrainerBase:
+             nrow: number of displays in each row
+         """
+         assert self.tf_logging or self.local_logging
++        # Sanitize NaN/Inf before image logging.
++        im_tensor = torch.nan_to_num(im_tensor.float(), nan=0.0, posinf=1.0, neginf=-1.0)
+         im_tensor = vutils.make_grid(im_tensor, nrow=nrow, normalize=True, scale_each=True) # c x H x W
++        im_tensor = im_tensor.clamp(0.0, 1.0)
+         if self.local_logging:
+             im_path = str(self.image_dir / phase / f"{tag}-{self.log_step_img[phase]}.png")
+             im_np = im_tensor.cpu().permute(1,2,0).numpy()

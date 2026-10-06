@@ -1,0 +1,20 @@
+diff --git a/core/logger.py b/core/logger.py
+index 9b48494..b8051c4 100644
+--- a/core/logger.py
++++ b/core/logger.py
+@@ -51,8 +51,13 @@ def parse(args):
+         gpu_list = gpu_ids
+     else:
+         gpu_list = ','.join(str(x) for x in opt['gpu_ids'])
+-    os.environ['CUDA_VISIBLE_DEVICES'] = gpu_list
+-    print('export CUDA_VISIBLE_DEVICES=' + gpu_list)
++    # Keep a CUDA_VISIBLE_DEVICES that is already set.
++    if 'CUDA_VISIBLE_DEVICES' in os.environ:
++        print('CUDA_VISIBLE_DEVICES preset to '
++              + os.environ['CUDA_VISIBLE_DEVICES'] + '; not overriding')
++    else:
++        os.environ['CUDA_VISIBLE_DEVICES'] = gpu_list
++        print('export CUDA_VISIBLE_DEVICES=' + gpu_list)
+     if len(gpu_list) > 1:
+         opt['distributed'] = True
+     else:

@@ -1,0 +1,122 @@
+runner: "BBDMRunner"
+training:
+  n_epochs: 280
+  n_steps: 50000
+  save_interval: 28
+  sample_interval: 28
+  validation_interval: 28
+  accumulate_grad_batches: 1
+
+testing:
+  clip_denoised: False
+  sample_num: 1
+
+data:
+  dataset_name: 'sar2opt'
+  dataset_type: 'custom_aligned'
+  dataset_config:
+    dataset_path: '${WORK_DIR}/ldm_data/sar2opt/bbdm'
+    image_size: 512
+    channels: 3
+    to_normal: True
+    flip: True
+  train:
+    batch_size: 8
+    shuffle: True
+  val:
+    batch_size: 8
+    shuffle: True
+  test:
+    batch_size: 11
+
+model:
+  model_name: "cBBDM-f4"
+  model_type: "LBBDM"
+  latent_before_quant_conv: False
+  normalize_latent: False
+  only_load_latent_mean_std: False
+
+  EMA:
+    use_ema: True
+    ema_decay: 0.995
+    update_ema_interval: 8
+    start_ema_step: 30000
+
+  CondStageParams:
+    n_stages: 2
+    in_channels: 3
+    out_channels: 3
+
+  VQGAN:
+    params:
+      ckpt_path: '${CKPT_ROOT}/vq-f4/model.ckpt'
+      embed_dim: 3
+      n_embed: 8192
+      ddconfig:
+        double_z: false
+        z_channels: 3
+        resolution: 512
+        in_channels: 3
+        out_ch: 3
+        ch: 128
+        ch_mult: !!python/tuple
+          - 1
+          - 2
+          - 4
+        num_res_blocks: 2
+        attn_resolutions: [ ]
+        dropout: 0.0
+
+      lossconfig:
+        target: torch.nn.Identity
+
+  BB:
+    optimizer:
+      weight_decay: 0.000
+      optimizer: 'Adam'
+      lr: 1.e-4
+      beta1: 0.9
+
+    lr_scheduler:
+      factor: 0.5
+      patience: 3000
+      threshold: 0.0001
+      cooldown: 3000
+      min_lr: 5.e-7
+
+    params:
+      mt_type: 'linear'
+      objective: 'grad'
+      loss_type: 'l1'
+
+      skip_sample: True
+      sample_type: 'linear'
+      sample_step: 200
+
+      num_timesteps: 1000
+      eta: 1.0
+      max_var: 1.0
+
+      UNetParams:
+        image_size: 128
+        in_channels: 6
+        model_channels: 128
+        out_channels: 3
+        num_res_blocks: 2
+        attention_resolutions: !!python/tuple
+          - 32
+          - 16
+          - 8
+        channel_mult: !!python/tuple
+          - 1
+          - 4
+          - 8
+        conv_resample: True
+        dims: 2
+        num_heads: 8
+        num_head_channels: 64
+        use_scale_shift_norm: True
+        resblock_updown: True
+        use_spatial_transformer: False
+        context_dim:
+        condition_key: "SpatialRescaler"

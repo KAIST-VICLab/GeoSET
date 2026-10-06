@@ -1,0 +1,131 @@
+diff --git a/_stubs/blobfile.py b/_stubs/blobfile.py
+new file mode 100644
+index 0000000..92caa99
+--- /dev/null
++++ b/_stubs/blobfile.py
+@@ -0,0 +1,9 @@
++"""Local-filesystem stand-in for blobfile."""
++import os, os.path
++BlobFile = open
++join = os.path.join
++dirname = os.path.dirname
++basename = os.path.basename
++exists = os.path.exists
++listdir = os.listdir
++isdir = os.path.isdir
+diff --git a/_stubs/mpi4py/MPI.py b/_stubs/mpi4py/MPI.py
+new file mode 100644
+index 0000000..881763e
+--- /dev/null
++++ b/_stubs/mpi4py/MPI.py
+@@ -0,0 +1,8 @@
++"""Single-process stand-in for mpi4py (world size 1)."""
++class _Comm:
++    rank = 0
++    size = 1
++    def Get_rank(self): return 0
++    def Get_size(self): return 1
++    def bcast(self, obj=None, root=0): return obj
++COMM_WORLD = _Comm()
+diff --git a/_stubs/mpi4py/__init__.py b/_stubs/mpi4py/__init__.py
+new file mode 100644
+index 0000000..4de5398
+--- /dev/null
++++ b/_stubs/mpi4py/__init__.py
+@@ -0,0 +1 @@
++from . import MPI
+diff --git a/guided_diffusion/dist_util.py b/guided_diffusion/dist_util.py
+index 4c1dbf4..6b152d6 100644
+--- a/guided_diffusion/dist_util.py
++++ b/guided_diffusion/dist_util.py
+@@ -24,7 +24,9 @@ def setup_dist():
+     """
+     if dist.is_initialized():
+         return
+-    os.environ["CUDA_VISIBLE_DEVICES"] = f"{MPI.COMM_WORLD.Get_rank() % GPUS_PER_NODE}"
++    # Keep a CUDA_VISIBLE_DEVICES that is already set.
++    if "CUDA_VISIBLE_DEVICES" not in os.environ:
++        os.environ["CUDA_VISIBLE_DEVICES"] = f"{MPI.COMM_WORLD.Get_rank() % GPUS_PER_NODE}"
+ 
+     comm = MPI.COMM_WORLD
+     backend = "gloo" if not th.cuda.is_available() else "nccl"
+diff --git a/scripts/image_sample_realtime.py b/scripts/image_sample_realtime.py
+index 6a88e36..6c793b7 100644
+--- a/scripts/image_sample_realtime.py
++++ b/scripts/image_sample_realtime.py
+@@ -43,8 +43,9 @@ class pair_Dataset(Dataset):
+         self.path_opt = os.path.join(path, "opt")
+         self.trans_sar = transforms_sar
+         self.trans_opt = transforms_opt
+-        sar_name_list = os.listdir(self.path_sar)
+-        opt_name_list = os.listdir(self.path_opt)
++        # Pair SAR and optical images by sorted file name.
++        sar_name_list = sorted(os.listdir(self.path_sar))
++        opt_name_list = sorted(os.listdir(self.path_opt))
+ 
+         self.all_img_sar = [os.path.join(self.path_sar, sar_name_list[i]) for i in range(len(sar_name_list))]
+         self.all_img_opt = [os.path.join(self.path_opt, opt_name_list[i]) for i in range(len(opt_name_list))]
+@@ -85,15 +86,18 @@ def main():
+     all_labels = []
+     all_sar = []
+     all_opt = []
+-    # TODO: change the path
+-    pair_datas = pair_Dataset('', transform_opt, transform_opt)
++    # Test images from --test_dir, resized to --image_size.
++    trans = transforms.Compose([
++        transforms.ToTensor(),
++        transforms.Resize((args.image_size, args.image_size)),
++        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
++    ])
++    pair_datas = pair_Dataset(args.test_dir, trans, trans)
+     data_loader = DataLoader(pair_datas, batch_size=args.batch_size, shuffle=False, num_workers=0)
+     count = 0
+-    if not os.path.exists(f'sample_results/{args.timestep_respacing}'):
+-        os.makedirs(f'sample_results/{args.timestep_respacing}')
+-        os.makedirs(f'sample_results/{args.timestep_respacing}/gen_opt')
+-        os.makedirs(f'sample_results/{args.timestep_respacing}/cond_sar')
+-        os.makedirs(f'sample_results/{args.timestep_respacing}/gt_opt')
++    out_root = args.out_dir or f'sample_results/{args.timestep_respacing}'
++    for sub in ('gen_opt', 'cond_sar', 'gt_opt'):
++        os.makedirs(os.path.join(out_root, sub), exist_ok=True)
+     loader = iter(data_loader)
+     while count * args.batch_size < args.num_samples:
+         model_kwargs = {}
+@@ -112,9 +116,10 @@ def main():
+             diffusion.p_sample_loop if not args.use_ddim else diffusion.ddim_sample_loop
+         )
+ 
++        # The last batch can be smaller than --batch_size.
+         sample = sample_fn(
+             model,
+-            (args.batch_size, 3, args.image_size, args.image_size),
++            (condition.shape[0], 3, args.image_size, args.image_size),
+             clip_denoised=args.clip_denoised,
+             model_kwargs=model_kwargs,
+             noise=None,
+@@ -155,13 +160,13 @@ def main():
+         for i in tqdm(range(l)):
+             image_out = Image.fromarray(arr[i])
+             image_out.save(
+-                os.path.join(f'sample_results/{args.timestep_respacing}/gen_opt', f'{i + count * args.batch_size}.png'))
++                os.path.join(os.path.join(out_root, 'gen_opt'), f'{i + count * args.batch_size}.png'))
+             image_sar = Image.fromarray(arr_sar[i])
+-            image_sar.save(os.path.join(f'sample_results/{args.timestep_respacing}/cond_sar',
++            image_sar.save(os.path.join(os.path.join(out_root, 'cond_sar'),
+                                         f'{i + count * args.batch_size}.png'))
+             image_opt = Image.fromarray(arr_opt[i])
+             image_opt.save(
+-                os.path.join(f'sample_results/{args.timestep_respacing}/gt_opt', f'{i + count * args.batch_size}.png'))
++                os.path.join(os.path.join(out_root, 'gt_opt'), f'{i + count * args.batch_size}.png'))
+         count += 1
+         if args.class_cond:
+             gathered_labels = [
+@@ -207,6 +212,8 @@ def create_argparser():
+         batch_size=16,
+         use_ddim=False,
+         model_path="",
++        test_dir="",
++        out_dir="",
+     )
+     defaults.update(model_and_diffusion_defaults())
+     parser = argparse.ArgumentParser()

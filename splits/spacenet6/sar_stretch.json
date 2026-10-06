@@ -1,0 +1,22 @@
+{
+ "lo": [
+  10.875099182128906,
+  13.251444816589355,
+  9.706974029541016
+ ],
+ "hi": [
+  16.819610595703125,
+  17.045244216918945,
+  16.598033905029297
+ ],
+ "bands": [
+  "HH",
+  "HV",
+  "VV"
+ ],
+ "p_lo": 1.0,
+ "p_hi": 99.0,
+ "n_tiles": 200,
+ "seed": 20260821,
+ "note": "1st/99th percentiles of 10*log10(SAR-Intensity) over valid pixels of n_tiles training tiles"
+}

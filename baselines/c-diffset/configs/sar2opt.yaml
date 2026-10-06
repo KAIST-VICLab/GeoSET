@@ -1,0 +1,45 @@
+seed: 2024
+num_worker: 4
+work_dir: ${WORK_DIR}/c-diffset/sar2opt/
+
+phase: train
+
+feeder: feeders.feeder.SAROptFeeder
+train_feeder_args:
+  dataroot: ${DATA_ROOT}/sar2opt/
+  listroot: ${WORK_DIR}/ldm_data/sar2opt/cdiffset/train.txt
+  load_size: 600
+  crop_size: 512
+  hflip: True
+  vflip: True
+  rot: True
+
+test_feeder_args:
+  dataroot: ${DATA_ROOT}/sar2opt/
+  listroot: ${WORK_DIR}/ldm_data/sar2opt/cdiffset/test.txt
+  load_size: 600
+  crop_size: 512
+
+optimizer: AdamW
+learning_rate: 3e-5
+weight_decay: 0.01
+lr_scheduler: cosine
+num_iter: 50000
+num_warmup: 100
+
+prediction_type: epsilon
+
+log_iter: 100
+save_iter: 10000
+save_epoch: 50
+eval_epoch: 50
+
+gpu: 0
+batch_size: 16
+test_batch_size: 1
+mixed_precision: "no"
+pretrained_model_name_or_path: Manojb/stable-diffusion-2-1-base
+accelerator_path: ${WORK_DIR}/sd21-ft/sar2opt/lastest/model.safetensors
+
+num_inference_steps: 50
+val_len: 100

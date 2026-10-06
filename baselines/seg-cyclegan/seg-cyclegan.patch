@@ -1,0 +1,55 @@
+diff --git a/data/evaluation_dataset.py b/data/evaluation_dataset.py
+index 1b4f405..30d6e31 100644
+--- a/data/evaluation_dataset.py
++++ b/data/evaluation_dataset.py
+@@ -18,8 +18,8 @@ class EvaluationDataset(BaseDataset):
+             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
+         """
+         BaseDataset.__init__(self, opt)
+-        self.eval_image_folder = "/speed-scratch/z_hannuo/sar2opt/whu_opt_sar/testA" #"/speed-scratch/z_hannuo/sar2opt/HRSID-DIOR-512/trainA"
+-        self.eval_samples = os.listdir(self.eval_image_folder)
++        self.eval_image_folder = os.environ['SEGCYC_EVAL_DIR']
++        self.eval_samples = sorted(os.listdir(self.eval_image_folder))
+         btoA = self.opt.direction == 'BtoA'
+         input_nc = self.opt.output_nc if btoA else self.opt.input_nc
+         self.transform_A = get_transform(self.opt, grayscale=(input_nc == 1))
+diff --git a/data/unaligned_dataset.py b/data/unaligned_dataset.py
+index a5c5323..13804fd 100644
+--- a/data/unaligned_dataset.py
++++ b/data/unaligned_dataset.py
+@@ -5,7 +5,6 @@ from PIL import Image
+ import random
+ import cv2 as cv
+ import torch
+-from libtiff import TIFF
+ 
+ ##Seg-CycleGAN下的Unaligned_dataset是我改过了的
+ 
+diff --git a/sar2opt_eval.py b/sar2opt_eval.py
+index d4166ff..f5403e5 100644
+--- a/sar2opt_eval.py
++++ b/sar2opt_eval.py
+@@ -14,7 +14,8 @@ import numpy as np
+ 
+ if __name__ == '__main__':
+ 
+-    save_folder = "/speed-scratch/z_hannuo/projects/gan/Seg-CycleGAN/validation_whu/cycle_200/pseudo_test" #"/speed-scratch/z_hannuo/projects/gan/Seg-CycleGAN/beta_45_e50"
++    save_folder = os.environ['SEGCYC_OUT']
++    os.makedirs(save_folder, exist_ok=True)
+ 
+     opt = TestOptions().parse()  # get test options
+     # hard-code some parameters for test
+diff --git a/train.py b/train.py
+index 32f70f0..0c04d56 100644
+--- a/train.py
++++ b/train.py
+@@ -33,7 +33,8 @@ if __name__ == '__main__':
+     model = create_model(opt)      # create a model given opt.model and other options
+     model.setup(opt)               # regular setup: load and print networks; create schedulers
+     model.tie_SegNet()
+-    model.load_SegNet_weights(weights_path='/speed-scratch/z_hannuo/sar2opt/seg-cycleGAN/Seg-CycleGAN-SegNet-guide.pth')
++    import os
++    model.load_SegNet_weights(weights_path=os.environ['SEGNET_WEIGHTS'])
+     model.SegNet_to_GPU()
+     visualizer = Visualizer(opt)   # create a visualizer that display/save images and plots
+     total_iters = 0                # the total number of training iterations

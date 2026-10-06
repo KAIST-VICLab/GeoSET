@@ -1,0 +1,56 @@
+GeoSET: Generalist Foundation Model for SAR-to-EO Image Translation
+Copyright 2026 Jeonghyeok Do and Munchurl Kim, KAIST
+
+This product includes software developed by the GeoSET authors, licensed under the Apache License,
+Version 2.0 (see LICENSE). The released model weights are not covered by LICENSE; see LICENSE-WEIGHTS.md.
+
+
+1. Third-party code and weights (Apache-2.0)
+
+FLUX.2, Black Forest Labs
+    https://github.com/black-forest-labs/flux2
+    https://huggingface.co/black-forest-labs/FLUX.2-klein-base-4B
+    src/geoset/transformer_geoset.py, src/geoset/autoencoder_flux2.py and src/geoset/sar_encoder_geoset.py
+    are adapted from the FLUX.2 transformer and autoencoder code and modified by the GeoSET authors: the
+    text stream is replaced by a SAR stream, and the modules are wrapped as diffusers models.
+    The GeoSET transformer is initialised from FLUX.2-klein-base-4B and the SAR encoder from its
+    autoencoder encoder. The FLUX.2-klein-base-4B autoencoder is redistributed with the weights
+    (generalist/vae), converted to float32.
+    GeoSET is not a FLUX product and is not endorsed by Black Forest Labs.
+
+Diffusers, Hugging Face
+    https://github.com/huggingface/diffusers
+    Model, pipeline and scheduler base classes. baselines/controlnet/train_controlnet.py is the diffusers
+    ControlNet training example (v0.37.0), modified by the GeoSET authors.
+
+
+2. Evaluation feature extractor (not redistributed)
+
+DINOv3, Meta Platforms, DINOv3 License
+    https://github.com/facebookresearch/dinov3
+    The DINO similarity metric of scripts/evaluate.py uses a frozen DINOv3-SAT ViT-L/16 (SAT-493M) as a
+    feature extractor. No DINOv3 code or weights are redistributed; obtain them from Meta under the
+    DINOv3 License. The GeoSET paper reports research performed using DINOv3.
+
+The evaluation metrics also use pytorch-fid, lpips, torchmetrics and pyiqa, installed from PyPI under
+their own licences.
+
+
+3. Datasets (not redistributed)
+
+Pretraining: GUSO, TerraMesh, SARLO-80, SAR-1M and 3MOS (docs/CORPUS.md).
+Downstream: QXS-SAROPT, SAR2Opt, SAR2EO and SpaceNet6 (docs/DATASETS.md).
+No imagery is redistributed. The corpus keep tables (corpus/) and split lists (splits/) name files of
+these datasets and contain no pixels.
+
+TerraMesh contains modified Copernicus Sentinel data.
+The SpaceNet Dataset by SpaceNet Partners is licensed under a Creative Commons Attribution-ShareAlike 4.0
+International License.
+
+
+4. Comparison methods
+
+baselines/ contains scripts, configurations and patches for sixteen prior methods. Each patch applies to
+the upstream code at a pinned commit and is subject to that code's licence; upstream source is fetched
+from its original repository and not redistributed. Licences of the upstream code and of the released
+comparison-method weights are listed in baselines/README.md and MODEL_ZOO.md.

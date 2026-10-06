@@ -1,0 +1,23 @@
+# GeoSET, tested with Python 3.12 and CUDA 12.8 (install the CUDA build of torch/torchvision for your system)
+torch==2.11.0
+torchvision==0.26.0
+diffusers==0.37.1
+accelerate==1.13.0
+huggingface_hub==1.26.0
+safetensors==0.7.0
+einops==0.8.2
+numpy==2.4.3
+scipy==1.17.1
+pillow==12.3.0
+
+# evaluation (scripts/evaluate.py)
+torchmetrics==1.9.0
+lpips==0.1.4
+pytorch-fid==0.3.0
+pyiqa==0.1.16
+
+# data and corpus preparation
+zarr==2.18.3
+numcodecs==0.13.1
+pyarrow==25.0.0
+rasterio==1.4.3

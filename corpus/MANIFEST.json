@@ -1,0 +1,165 @@
+{
+  "version": "keep_v1",
+  "columns": [
+    "sample_id",
+    "scene_id",
+    "keep",
+    "reasons"
+  ],
+  "reasons": [
+    "featureless",
+    "cloud",
+    "misregistration",
+    "compression",
+    "missing_tile",
+    "no_data"
+  ],
+  "streams": {
+    "guso": {
+      "file": "keep_v1/guso.tsv.gz",
+      "tsv_sha256": "b1fbd0f67b8ce3f0557faec8e074955970b9069c214c75cc29f0a69b0eb0b41d",
+      "eligible": 589137,
+      "kept": 585424,
+      "removed": 3713,
+      "reasons": {
+        "featureless": 3713
+      },
+      "tile_px": 512,
+      "crops_per_tile": 4,
+      "redundancy": 1,
+      "crop_equivalents": 2341696,
+      "weight": 3872
+    },
+    "terramesh": {
+      "file": "keep_v1/terramesh.tsv.gz",
+      "tsv_sha256": "1f8ac2fb0973497e2fc6c26581af1e3bd18865f75d5ab02b93e6742fb59617cd",
+      "eligible": 1760233,
+      "kept": 1741434,
+      "removed": 18799,
+      "reasons": {
+        "featureless": 18799
+      },
+      "tile_px": 264,
+      "crops_per_tile": 1,
+      "redundancy": 1,
+      "crop_equivalents": 1741434,
+      "weight": 2880
+    },
+    "sarlo80": {
+      "file": "keep_v1/sarlo80.tsv.gz",
+      "tsv_sha256": "2c0d9721c3782be1c5f92118c8de771f096e3aa6370181d7cda94af522976ebd",
+      "eligible": 87869,
+      "kept": 77932,
+      "removed": 9937,
+      "reasons": {
+        "featureless": 3443,
+        "misregistration": 6413,
+        "missing_tile": 270
+      },
+      "tile_px": 1024,
+      "crops_per_tile": 16,
+      "redundancy": 1,
+      "crop_equivalents": 1246912,
+      "weight": 2062
+    },
+    "sar1m": {
+      "file": "keep_v1/sar1m.tsv.gz",
+      "tsv_sha256": "6bd52b1ae2de661c4fa0358a945c86d083737c9edb5f1aa203fc99c1c4a12605",
+      "eligible": 731080,
+      "kept": 688458,
+      "removed": 42622,
+      "reasons": {
+        "featureless": 24897,
+        "cloud": 17903,
+        "compression": 453
+      },
+      "tile_px": 256,
+      "crops_per_tile": 1,
+      "redundancy": 1,
+      "crop_equivalents": 688458,
+      "weight": 1139
+    },
+    "3mos_mr": {
+      "file": "keep_v1/3mos_mr.tsv.gz",
+      "tsv_sha256": "704e4f62a69711222ed1152f0655a57a57237bca0ed0ebb5f75f184af6217d87",
+      "eligible": 87293,
+      "kept": 85924,
+      "removed": 1369,
+      "reasons": {
+        "featureless": 599,
+        "cloud": 674,
+        "compression": 129,
+        "no_data": 161
+      },
+      "tile_px": 256,
+      "crops_per_tile": 1,
+      "redundancy": 4,
+      "crop_equivalents": 21481,
+      "weight": 36
+    },
+    "3mos_hr": {
+      "file": "keep_v1/3mos_hr.tsv.gz",
+      "tsv_sha256": "aa4266acc696d080a98246fa2df0fd6ee16948fa712679a72cab4a017b3f42fc",
+      "eligible": 25781,
+      "kept": 25572,
+      "removed": 209,
+      "reasons": {
+        "featureless": 64,
+        "cloud": 145
+      },
+      "tile_px": 256,
+      "crops_per_tile": 1,
+      "redundancy": 4,
+      "crop_equivalents": 6393,
+      "weight": 11
+    }
+  },
+  "total": {
+    "eligible": 3281393,
+    "kept": 3204744,
+    "removed": 76649,
+    "crop_equivalents": 6046374,
+    "reasons": {
+      "featureless": 51515,
+      "cloud": 18722,
+      "misregistration": 6413,
+      "compression": 582,
+      "missing_tile": 270,
+      "no_data": 161
+    }
+  },
+  "stage1": {
+    "streams": {
+      "guso": {
+        "samples": 589143,
+        "crop_equivalents": 2356572,
+        "weight": 1853
+      },
+      "terramesh": {
+        "samples": 8194048,
+        "crop_equivalents": 8194048,
+        "weight": 6444
+      },
+      "sarlo80": {
+        "samples": 87870,
+        "crop_equivalents": 1405920,
+        "weight": 1106
+      },
+      "sar1m": {
+        "samples": 731080,
+        "crop_equivalents": 731080,
+        "weight": 575
+      },
+      "3mos_mr": {
+        "samples": 87293,
+        "crop_equivalents": 21823,
+        "weight": 17
+      },
+      "3mos_hr": {
+        "samples": 25781,
+        "crop_equivalents": 6445,
+        "weight": 5
+      }
+    }
+  }
+}
