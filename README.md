@@ -347,12 +347,27 @@ If you find GeoSET useful, please consider citing:
 }
 ```
 
-Our prior work on SAR-to-EO image translation, [C-DiffSET](https://github.com/KAIST-VICLab/C-DiffSET) ([project page](https://kaist-viclab.github.io/C-DiffSET_site/)):
+### Prior work
+
+**[C-DiffSET](https://github.com/KAIST-VICLab/C-DiffSET)** ([project page](https://kaist-viclab.github.io/C-DiffSET_site/)), IEEE TCSVT 2026: SAR-to-EO translation with latent diffusion.
+
 ```BibTeX
 @article{do2026cdiffset,
   title={C-diffset: Leveraging latent diffusion for sar-to-eo image translation with confidence-guided reliable object generation},
   author={Do, Jeonghyeok and Lee, Jaehyup and Lee, Seungchul and Kim, Munchurl},
   journal={IEEE Transactions on Circuits and Systems for Video Technology},
+  year={2026},
+  publisher={IEEE}
+}
+```
+
+**[ReFlowSET](https://github.com/KAIST-VICLab/ReFlowSET)** ([project page](https://kaist-viclab.github.io/ReFlowSET_site/)), IEEE GRSL 2026: SAR-to-EO translation with latent flow matching.
+
+```BibTeX
+@article{do2026reflowset,
+  title   = {ReFlowSET: Representation-Aligned Latent Flow Matching for SAR-to-EO Image Translation},
+  author  = {Do, Jeonghyeok and Lee, Seungchul and Kim, Munchurl},
+  journal={IEEE Geoscience and Remote Sensing Letters},
   year={2026},
   publisher={IEEE}
 }
